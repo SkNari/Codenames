@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+  server:
+    build: ./server
+    container_name: server
+    command: npm start
+    ports:
+      - "8000:8000"
+    restart: always
+    networks:
+      - codenames
+  front:
+    build: ./front
+    container_name: front
+    command: ng serve --host 0.0.0.0 --disable-host-check
+    ports:
+      - "4200:4200"
+    restart: always
+    networks:
+      - codenames
+
+networks:
+  codenames:
+    driver: bridge

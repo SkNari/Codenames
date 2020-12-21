@@ -1,0 +1,7 @@
+<p>homepage works!</p>
+
+<div *ngFor="let item of roomService.rooms | keyvalue">
+    Key: <b>{{item.key}}</b> and Value: <b>{{item.value}}</b>
+</div>
+
+<button (click)="createRoom()">createRoom</button>
