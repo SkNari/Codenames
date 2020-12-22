@@ -14,7 +14,6 @@ export class HomepageComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.askRooms();
   }
 
   createRoom(){

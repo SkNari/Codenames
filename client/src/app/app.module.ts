@@ -6,11 +6,13 @@ import { AppComponent } from './app.component';
 import { HomepageComponent } from './homepage/homepage.component';
 import { ClientService } from './service/client.service';
 import { RoomService } from './service/room.service';
+import { RoomComponent } from './room/room.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    HomepageComponent
+    HomepageComponent,
+    RoomComponent
   ],
   imports: [
     BrowserModule,

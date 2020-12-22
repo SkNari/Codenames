@@ -22,6 +22,7 @@ function serverInterface(socket){
 
   sockets[socket.id]=socket;
   socket.emit('connection', "you are connected");
+  socket.emit("sendRooms",rooms);
   
   socket.on('askForRooms', () => {
       
