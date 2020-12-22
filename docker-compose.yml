@@ -12,7 +12,7 @@ services:
   client:
     build: ./client
     container_name: client
-    command: ng serve --host 0.0.0.0 --disable-host-check
+    command: npm start
     ports:
       - "4200:4200"
     restart: always
