@@ -9,9 +9,9 @@ services:
     restart: always
     networks:
       - codenames
-  front:
-    build: ./front
-    container_name: front
+  client:
+    build: ./client
+    container_name: client
     command: ng serve --host 0.0.0.0 --disable-host-check
     ports:
       - "4200:4200"
