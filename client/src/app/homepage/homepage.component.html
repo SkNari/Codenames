@@ -1,7 +1,19 @@
-<p>homepage works!</p>
-
-<div *ngFor="let item of roomService.rooms | keyvalue">
-    Key: <b>{{item.key}}</b> and Value: <b>{{item.value}}</b>
+<div class="container">
+    <div class="row">
+        <div class="[ col-xs-12 col-sm-offset-2 col-sm-8 ]">
+            <ul class="event-list" *ngFor="let item of client.rooms | keyvalue">
+                <li>
+                    <div class="info">
+                        <h2 class="title">{{item.value.name}}</h2>
+                        <p class="desc"></p>
+                    </div>
+                    <div class="social">
+                        <a href="{{item.value.name}}"><span>Join game</span></a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
 </div>
 
-<button (click)="createRoom()">createRoom</button>
+<button (click)="createRoom()" class="btn btn-primary col-xs-4 col-xs-offset-4">createRoom</button>

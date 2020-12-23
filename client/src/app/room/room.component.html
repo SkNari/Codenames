@@ -1,1 +1,8 @@
 <p>{{roomName}}!</p>
+
+<div *ngIf="client.currentRoom">
+    <div *ngFor="let item of client.currentRoom.members | keyvalue">
+        {{item.value}}<br>
+    </div>
+</div>
+

@@ -9,7 +9,7 @@ import { RoomService } from '../service/room.service';
 })
 export class HomepageComponent implements OnInit {
 
-  constructor(private client : ClientService, public roomService : RoomService) {
+  constructor(public client : ClientService) {
 
   }
 

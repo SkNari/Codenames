@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import {io} from 'socket.io-client';
 import { RoomService } from './room.service';
 
@@ -8,7 +9,9 @@ import { RoomService } from './room.service';
 export class ClientService {
 
   private socket : any;
-  constructor(private roomService : RoomService){
+  public rooms : any;
+  public currentRoom : any;
+  constructor(private roomService : RoomService,private router : Router){
 
     this.socket = io("http://localhost:8000");
     this.socket.on('connection', text => {
@@ -18,8 +21,34 @@ export class ClientService {
     })
     this.socket.on("sendRooms", rooms => {
 
-      this.roomService.setRooms(rooms);
-      console.log(this.roomService.getRooms());
+      this.rooms = rooms
+
+    })
+
+    this.socket.on("roomJoined", room =>{
+      
+      if(!room){
+        this.router.navigate(["/"]);
+      }
+      this.currentRoom = room;
+
+    })
+
+    this.socket.on("roomCreated", room => {
+
+      this.router.navigate([room.name]);
+
+    })
+
+    this.socket.on("roomUpdate", room => {
+      this.currentRoom = room;
+    })
+
+    this.socket.on("disconnect", () => {
+
+      this.currentRoom = null;
+      this.rooms = null;
+      this.router.navigate(["/"]);
 
     })
    }
@@ -30,6 +59,10 @@ export class ClientService {
 
    askForRooms(){
      this.socket.emit('askForRooms');
+   }
+
+   joinRoom(roomName : string){
+     this.socket.emit('joinRoom', roomName);
    }
 
 }

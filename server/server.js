@@ -36,30 +36,57 @@ function serverInterface(socket){
       var newRoom = new Room(name);
 
       if(socket.room){
-        socket.room.removePlayer(socket);
+        let currentRoom = socket.room;
+        currentRoom.leaveGame(socket);
+        warnRoom(currentRoom,"roomUpdate",currentRoom);
       }
 
       socket.room = newRoom;
       rooms[name] = newRoom;
-      newRoom.addPlayer(socket,socket.id);
+      newRoom.joinGame(socket,socket.id);
+      newRoom.joinSpectator(socket,socket.id);
       count++;
+      socket.emit("roomCreated",newRoom);
       io.emit("sendRooms",rooms);
 
   })
 
   socket.on('joinRoom', room => {
 
+    let currentRoom;
     if(socket.room){
-      socket.room.removePlayer(socket);
+      currentRoom = socket.room;
+      currentRoom.leaveGame(socket);
+      warnRoom(currentRoom,"roomUpdate",currentRoom);
     }
 
     currentRoom = rooms[room];
     if(currentRoom){
-      socket.room = newRoom;
-      currentRoom.addPlayer(socker,socket.id);
+      socket.room = currentRoom;
+      currentRoom.joinGame(socket,socket.id);
+      currentRoom.joinSpectator(socket,socket.id);
+      warnRoom(currentRoom,"roomUpdate",currentRoom);
+    } 
+
+    socket.emit("roomJoined",currentRoom);
+  })
+
+  socket.on('disconnect', () => {
+
+    if(socket.room){
+      var currentRoom = socket.room;
+      currentRoom.leaveGame(socket);
+      warnRoom(currentRoom,"roomUpdate",currentRoom);
     }
 
-    io.emit("sendRooms",rooms);
+  })
+
+}
+
+function warnRoom(room,action,data){
+
+  Object.keys(room.members).forEach(key => {
+    sockets[key].emit(action,data);
   })
 
 }
