@@ -71,11 +71,37 @@ function serverInterface(socket){
     socket.emit("roomJoined",currentRoom);
   })
 
+  socket.on('chat',message => {
+
+    if(socket.room){
+
+      let currentRoom = socket.room;
+      currentRoom.chat.push(message);
+      warnRoom(currentRoom,"chatUpdate",currentRoom.chat);
+
+    }
+
+  })
+
+  socket.on('leaveRoom' , () => {
+
+    if(socket.room){
+
+      let currentRoom = socket.room;
+      currentRoom.leaveGame(socket);
+      socket.room = null;
+      warnRoom(currentRoom,"roomUpdate",currentRoom);
+
+    }
+
+  })
+
   socket.on('disconnect', () => {
 
     if(socket.room){
       var currentRoom = socket.room;
       currentRoom.leaveGame(socket);
+      socket.room = null;
       warnRoom(currentRoom,"roomUpdate",currentRoom);
     }
 

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ClientService } from '../service/client.service';
 
 @Component({
@@ -10,11 +10,20 @@ import { ClientService } from '../service/client.service';
 export class RoomComponent implements OnInit {
 
   public roomName : any;
-  constructor(private route : ActivatedRoute,public client : ClientService) { }
+  constructor(private route : ActivatedRoute,public client : ClientService, private router : Router) { }
 
   ngOnInit(): void {
     this.roomName = this.route.snapshot.paramMap.get('roomName');
     this.client.joinRoom(this.roomName);
+  }
+
+  sendMessage(text : string){
+    this.client.sendMessage(text);
+  }
+
+  leaveRoom(){
+    this.client.leaveRoom();
+    this.router.navigate(["/"]);
   }
 
 

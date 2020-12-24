@@ -12,6 +12,7 @@ class Room{
         this.spectators = {};
         this.inspectors = {};
         this.game = new Game();
+        this.chat = [];
 
     }
 

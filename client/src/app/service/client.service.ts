@@ -51,6 +51,12 @@ export class ClientService {
       this.router.navigate(["/"]);
 
     })
+
+    this.socket.on("chatUpdate", chat => {
+
+      this.currentRoom.chat = chat;
+
+    })
    }
 
    createRoom(){
@@ -65,5 +71,12 @@ export class ClientService {
      this.socket.emit('joinRoom', roomName);
    }
 
+   sendMessage(message : string){
+      this.socket.emit("chat",message);
+   }
+
+   leaveRoom(){
+     this.socket.emit("leaveRoom");
+   }
 }
 
