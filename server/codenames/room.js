@@ -1,4 +1,5 @@
 const Game = require("./game.js");
+const Player = require("./player.js");
 
 class Room{
 
@@ -6,42 +7,53 @@ class Room{
 
         this.name = name;
         this.members = {};
-        this.players = {}; 
-        this.blue = {};
-        this.red = {};  
-        this.spectators = {};
-        this.inspectors = {};
+        this.players = {};
         this.game = new Game();
         this.chat = [];
 
     }
 
-    joinPlayer(socket,name){
-        this.players[socket.id] = name;
-        this.leaveSpectator(socket);
+    async init(){
+        await this.game.init();
     }
 
-    leavePlayer(socket){
-        delete this.players[socket.id];
+    joinMembers(key,name,socket){
+        
+        this.members[key] = {player: new Player(name),socket:socket};
+
     }
 
-    joinSpectator(socket,name){
-        this.spectators[socket.id] = name;
-        this.leavePlayer(socket);
-    }
-    
-    leaveSpectator(socket){
-        delete this.players[socket.id];
+    joinPlayers(key){
+        if(this.members[key]){
+            this.players[key] = this.members[key];
+        }
     }
 
-    joinGame(socket,name){
-        this.members[socket.id] = name;
+    leaveRoom(key){
+        delete this.members[key];
+        delete this.players[key];
     }
 
-    leaveGame(socket){
-        this.leaveSpectator(socket);
-        this.leavePlayer(socket);
-        delete this.members[socket.id];
+    getRoomSecured(){ //this function returns the current state of the rooms withour leaking sensible data like user keys
+
+        var i = 0;
+        var room = new Room();
+        this.members.values.forEach( val => {
+            room.members[i] = val;
+            i++
+        })
+
+        i=0;
+        this.players.values.forEach( val => {
+            room.players[i] = val;
+            i++
+        })
+
+        room.name = this.name;
+        room.chat = this.chat;
+        room.game = this.game;
+
+        return room;
     }
 
 }

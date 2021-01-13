@@ -9,6 +9,12 @@
     </div>
 </div>
 
+<div *ngIf="client.currentRoom">
+    <div *ngFor="let word of client.currentRoom.game.words">
+        <p style='color: {{word.color}}'>{{word.label}}</p><br>
+    </div>
+</div>
+
 <div class="container">
     <div class="row">
         <div class="col-md-8">

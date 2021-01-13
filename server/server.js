@@ -6,9 +6,10 @@ const io = require('socket.io')(server,{
       methods: ["GET", "POST"]
     }
 });
+const { query } = require('express');
 const Room = require("./codenames/room.js");  
 
-var sockets = {};
+var connectedUsers = {};
 var rooms = {};
 var count = 0;
 
@@ -19,100 +20,29 @@ server.listen(8000);
 //SERVER INTERFACE
 
 function serverInterface(socket){
-
-  sockets[socket.id]=socket;
-  socket.emit('connection', "you are connected");
-  socket.emit("sendRooms",rooms);
   
-  socket.on('askForRooms', () => {
-      
-      socket.emit("sendRooms",rooms);
-  
-  })
+  var key = socket.handshake.query.key;
 
-  socket.on('createRoom', () => {
+  if(!key || key=='null'){
 
-      var name = "room"+count;
-      var newRoom = new Room(name);
+    key = (new Date()).getTime();
+    socket.emit("newKey", key);
 
-      if(socket.room){
-        let currentRoom = socket.room;
-        currentRoom.leaveGame(socket);
-        warnRoom(currentRoom,"roomUpdate",currentRoom);
-      }
+  }
 
-      socket.room = newRoom;
-      rooms[name] = newRoom;
-      newRoom.joinGame(socket,socket.id);
-      newRoom.joinSpectator(socket,socket.id);
-      count++;
-      socket.emit("roomCreated",newRoom);
-      io.emit("sendRooms",rooms);
-
-  })
-
-  socket.on('joinRoom', room => {
-
-    let currentRoom;
-    if(socket.room){
-      currentRoom = socket.room;
-      currentRoom.leaveGame(socket);
-      warnRoom(currentRoom,"roomUpdate",currentRoom);
-    }
-
-    currentRoom = rooms[room];
-    if(currentRoom){
-      socket.room = currentRoom;
-      currentRoom.joinGame(socket,socket.id);
-      currentRoom.joinSpectator(socket,socket.id);
-      warnRoom(currentRoom,"roomUpdate",currentRoom);
-    } 
-
-    socket.emit("roomJoined",currentRoom);
-  })
-
-  socket.on('chat',message => {
-
-    if(socket.room){
-
-      let currentRoom = socket.room;
-      currentRoom.chat.push(message);
-      warnRoom(currentRoom,"chatUpdate",currentRoom.chat);
-
-    }
-
-  })
-
-  socket.on('leaveRoom' , () => {
-
-    if(socket.room){
-
-      let currentRoom = socket.room;
-      currentRoom.leaveGame(socket);
-      socket.room = null;
-      warnRoom(currentRoom,"roomUpdate",currentRoom);
-
-    }
-
-  })
-
-  socket.on('disconnect', () => {
-
-    if(socket.room){
-      var currentRoom = socket.room;
-      currentRoom.leaveGame(socket);
-      socket.room = null;
-      warnRoom(currentRoom,"roomUpdate",currentRoom);
-    }
-
-  })
+  if(connectedUsers[key]){
+    connectedUsers[key].sockets[socket.id] = socket;
+  }else{
+    connectedUsers[key] = {sockets:{},name:""};
+    connectedUsers[key].sockets[socket.id] = socket;
+  }
 
 }
 
 function warnRoom(room,action,data){
 
-  Object.keys(room.members).forEach(key => {
-    sockets[key].emit(action,data);
+  Object.values(room.members).forEach(member => {
+    sockets[member.socket].emit(action,data);
   })
 
 }

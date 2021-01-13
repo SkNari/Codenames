@@ -1,7 +1,10 @@
+import { query } from '@angular/animations';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import {io} from 'socket.io-client';
 import { RoomService } from './room.service';
+
+//import { CookieService } from "angular2-cookie/core";
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +16,7 @@ export class ClientService {
   public currentRoom : any;
   constructor(private roomService : RoomService,private router : Router){
 
-    this.socket = io("http://localhost:8000");
+    this.socket = io("http://localhost:8000",{query: 'key='+localStorage.getItem("key")});
     this.socket.on('connection', text => {
 
       console.log(text);
@@ -21,6 +24,7 @@ export class ClientService {
     })
     this.socket.on("sendRooms", rooms => {
 
+      console.log(rooms);
       this.rooms = rooms
 
     })
@@ -40,8 +44,15 @@ export class ClientService {
 
     })
 
+    this.socket.on("newKey", key => {
+
+      localStorage.setItem("key",key);
+
+    })
+
     this.socket.on("roomUpdate", room => {
       this.currentRoom = room;
+      console.log(room);
     })
 
     this.socket.on("disconnect", () => {
@@ -68,7 +79,7 @@ export class ClientService {
    }
 
    joinRoom(roomName : string){
-     this.socket.emit('joinRoom', roomName);
+      this.socket.emit('joinRoom', roomName);
    }
 
    sendMessage(message : string){
