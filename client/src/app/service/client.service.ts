@@ -24,7 +24,7 @@ export class ClientService {
     })
     this.socket.on("sendRooms", rooms => {
 
-      //console.log(rooms);
+      console.log(rooms);
       this.rooms = rooms
 
     })

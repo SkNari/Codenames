@@ -51,13 +51,25 @@ function serverInterface(socket){
 
   })
 
-  socket.on('joinRoom', (room,callback) => {
+  socket.on('joinRoom', (roomKey,callback) => {
 
     let error = null;
 
-    
+    if(!rooms[roomKey]){
+      error = "room does not exist";
+      callback({joined:false},error);
+    }else{
+      var room = rooms[roomKey];
+      var user = connectedUsers[key];
+      var currentRoom = user.room;
 
-    callback({joined:true},error);
+      if(currentRoom){
+        currentRoom.leaveRoom(key);
+      }
+      room.joinRoom(key,user.name);
+      callback({joined:true},error);
+      warnRoom(room,"roomUpdate",room);
+    }
 
   })
 
@@ -65,7 +77,7 @@ function serverInterface(socket){
 
     let roomKey = uniqid.process();
     let name = connectedUsers[key].name + " 's room";
-    var room = new Room(name,key);
+    var room = new Room(name,roomKey);
 
     rooms[roomKey] = room;
     
@@ -80,12 +92,24 @@ function serverInterface(socket){
 
   })
 
+  socket.on('leaveRoom', () => {
+
+    var user = connectedUsers[key];
+    var currentRoom = user.room;
+
+    if(currentRoom){
+      currentRoom.leaveRoom(key);
+      warnRoom(currentRoom,"roomUpdate",currentRoom);
+    }
+
+  })
+
 }
 
 function warnRoom(room,action,data){
 
-  Object.values(room.members).forEach(member => {
-    sockets[member.socket].emit(action,data);
+  Object.keys(room.members).forEach(memberKey => {
+    sendToPlayer(connectedUsers[memberKey],action,data);
   })
 
 }
