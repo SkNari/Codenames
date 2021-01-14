@@ -15,7 +15,7 @@ export class ClientService {
   public rooms : any;
   public currentRoom : any;
   constructor(private roomService : RoomService,private router : Router){
-
+    
     this.socket = io("http://localhost:8000",{query: 'key='+localStorage.getItem("key")});
     this.socket.on('connection', text => {
 
@@ -24,23 +24,8 @@ export class ClientService {
     })
     this.socket.on("sendRooms", rooms => {
 
-      console.log(rooms);
+      //console.log(rooms);
       this.rooms = rooms
-
-    })
-
-    this.socket.on("roomJoined", room =>{
-      
-      if(!room){
-        this.router.navigate(["/"]);
-      }
-      this.currentRoom = room;
-
-    })
-
-    this.socket.on("roomCreated", room => {
-
-      this.router.navigate([room.name]);
 
     })
 
@@ -52,7 +37,6 @@ export class ClientService {
 
     this.socket.on("roomUpdate", room => {
       this.currentRoom = room;
-      console.log(room);
     })
 
     this.socket.on("disconnect", () => {
@@ -71,15 +55,29 @@ export class ClientService {
    }
 
    createRoom(){
-     this.socket.emit('createRoom');
+     this.socket.emit('createRoom', {} ,(key) => {
+      this.router.navigate([key]);
+     });
    }
 
    askForRooms(){
-     this.socket.emit('askForRooms');
+     this.socket.emit('askForRooms', {} , (rooms) => {
+        
+        this.rooms = rooms;
+
+     })
    }
 
    joinRoom(roomName : string){
-      this.socket.emit('joinRoom', roomName);
+      this.socket.emit('joinRoom', roomName, (room,error) => {
+
+        if(error){
+          this.router.navigate([""]);
+        }else{
+          this.currentRoom = room;
+        }
+
+      }); 
    }
 
    sendMessage(message : string){

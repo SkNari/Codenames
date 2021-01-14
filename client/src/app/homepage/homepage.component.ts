@@ -20,8 +20,4 @@ export class HomepageComponent implements OnInit {
     this.client.createRoom();
   }
 
-  askRooms(){
-    this.client.askForRooms();
-  }
-
 }

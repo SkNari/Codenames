@@ -8,6 +8,7 @@ const io = require('socket.io')(server,{
 });
 const { query } = require('express');
 const Room = require("./codenames/room.js");  
+const uniqid = require('uniqid');
 
 var connectedUsers = {};
 var rooms = {};
@@ -21,11 +22,12 @@ server.listen(8000);
 
 function serverInterface(socket){
   
+  var currentRoom;
   var key = socket.handshake.query.key;
 
   if(!key || key=='null'){
 
-    key = (new Date()).getTime();
+    key = uniqid();
     socket.emit("newKey", key);
 
   }
@@ -37,6 +39,47 @@ function serverInterface(socket){
     connectedUsers[key].sockets[socket.id] = socket;
   }
 
+  socket.emit("sendRooms",rooms);
+
+  socket.on('disconnect', () => {
+
+    delete connectedUsers[key].sockets[socket.id];
+    
+    if(Object.keys(connectedUsers[key].sockets).length==0){
+      delete connectedUsers[key];
+    }
+
+  })
+
+  socket.on('joinRoom', (room,callback) => {
+
+    let error = null;
+
+    
+
+    callback({joined:true},error);
+
+  })
+
+  socket.on('createRoom', function (data,callback) {
+
+    let roomKey = uniqid.process();
+    let name = connectedUsers[key].name + " 's room";
+    var room = new Room(name,key);
+
+    rooms[roomKey] = room;
+    
+    callback(roomKey);
+    io.emit("sendRooms",rooms);
+    
+  })
+
+  socket.on('askForRooms', (data,callback) => {
+
+    callback(rooms);
+
+  })
+
 }
 
 function warnRoom(room,action,data){
@@ -46,3 +89,10 @@ function warnRoom(room,action,data){
   })
 
 }
+
+function sendToPlayer(player,action,data){
+  Object.values(player.sockets).forEach(socket => {
+    socket.emit(action,data);
+  })
+}
+

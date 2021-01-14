@@ -3,9 +3,10 @@ const Player = require("./player.js");
 
 class Room{
 
-    constructor(name){
+    constructor(name,key){
 
         this.name = name;
+        this.key = key;
         this.members = {};
         this.players = {};
         this.game = new Game();
@@ -17,13 +18,13 @@ class Room{
         await this.game.init();
     }
 
-    joinMembers(key,name,socket){
+    joinMembers(user){
         
         this.members[key] = {player: new Player(name),socket:socket};
 
     }
 
-    joinPlayers(key){
+    joinPlayers(user){
         if(this.members[key]){
             this.players[key] = this.members[key];
         }
