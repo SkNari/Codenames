@@ -1,0 +1,12 @@
+<div class="askName">
+    <div class="row">
+        <div class="col-md-12 form-group">
+            <input type="text" placeholder="Choisir nom" class="form-control askNameInput" #askNameInput>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 form-group">
+            <button class="btn btn-block btn-login" (click)="changeName(askNameInput.value)">Valider</button>
+        </div>
+    </div>
+</div>

@@ -1,7 +1,9 @@
 import { query } from '@angular/animations';
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router } from '@angular/router'; 
+import { CookieService } from 'ngx-cookie-service';
 import {io} from 'socket.io-client';
+import { NavigateService } from './navigate.service';
 import { RoomService } from './room.service';
 
 //import { CookieService } from "angular2-cookie/core";
@@ -14,9 +16,18 @@ export class ClientService {
   private socket : any;
   public rooms : any;
   public currentRoom : any;
-  constructor(private roomService : RoomService,private router : Router){
-    
-    this.socket = io("http://localhost:8000",{query: 'key='+localStorage.getItem("key")});
+  public userName;
+  private userKey;
+
+  constructor(private roomService : RoomService,private router : Router,private cookieService : CookieService,private navigateService : NavigateService){
+
+    this.userName = this.cookieService.check("name")?this.cookieService.get("name"):null;
+    this.userKey = this.cookieService.check("key")?this.cookieService.get("key"):"";
+
+    this.socket = io("http://localhost:8000",{query: {
+      key : this.userKey,
+      name : this.userName
+    }});
     this.socket.on('connection', text => {
 
       console.log(text);
@@ -24,14 +35,13 @@ export class ClientService {
     })
     this.socket.on("sendRooms", rooms => {
 
-      console.log(rooms);
       this.rooms = rooms
 
     })
 
     this.socket.on("newKey", key => {
 
-      localStorage.setItem("key",key);
+      this.cookieService.set("key",key);
 
     })
 
@@ -56,7 +66,7 @@ export class ClientService {
 
    createRoom(){
      this.socket.emit('createRoom', {} ,(key) => {
-      this.router.navigate([key]);
+      this.router.navigate(["room/"+key]);
      });
    }
 
@@ -86,6 +96,13 @@ export class ClientService {
 
    leaveRoom(){
      this.socket.emit("leaveRoom");
+   }
+
+   setUserName(name : string){
+
+    this.cookieService.set("name",name);
+    this.userName = name;
+
    }
 }
 

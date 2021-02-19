@@ -24,6 +24,7 @@ function serverInterface(socket){
   
   var currentRoom;
   var key = socket.handshake.query.key;
+  var name = socket.handshake.query.name;
 
   if(!key || key=='null'){
 
@@ -35,13 +36,22 @@ function serverInterface(socket){
   if(connectedUsers[key]){
     connectedUsers[key].sockets[socket.id] = socket;
   }else{
-    connectedUsers[key] = {sockets:{},name:""};
+    connectedUsers[key] = {sockets:{},name:name};
     connectedUsers[key].sockets[socket.id] = socket;
   }
 
   socket.emit("sendRooms",rooms);
 
   socket.on('disconnect', () => {
+
+    var currentRoom = connectedUsers[key].room;
+
+    console.log(currentRoom);
+
+    if(currentRoom){
+      currentRoom.leaveRoom(key);
+      warnRoom(currentRoom,"roomUpdate",currentRoom);
+    } 
 
     delete connectedUsers[key].sockets[socket.id];
     
@@ -66,6 +76,7 @@ function serverInterface(socket){
       if(currentRoom){
         currentRoom.leaveRoom(key);
       }
+      user.room = room;
       room.joinRoom(key,user.name);
       callback({joined:true},error);
       warnRoom(room,"roomUpdate",room);
@@ -100,6 +111,7 @@ function serverInterface(socket){
     if(currentRoom){
       currentRoom.leaveRoom(key);
       warnRoom(currentRoom,"roomUpdate",currentRoom);
+      delete user.room;
     }
 
   })
@@ -119,4 +131,3 @@ function sendToPlayer(player,action,data){
     socket.emit(action,data);
   })
 }
-

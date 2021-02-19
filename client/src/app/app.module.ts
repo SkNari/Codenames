@@ -8,17 +8,21 @@ import { ClientService } from './service/client.service';
 import { RoomService } from './service/room.service';
 import { RoomComponent } from './room/room.component';
 
+import { CookieService } from 'ngx-cookie-service';
+import { AskNameComponent } from './ask-name/ask-name.component';
+
 @NgModule({
   declarations: [
     AppComponent,
     HomepageComponent,
-    RoomComponent
+    RoomComponent,
+    AskNameComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule
   ],
-  providers:   [ClientService,RoomService],
+  providers:   [ClientService,RoomService,CookieService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
